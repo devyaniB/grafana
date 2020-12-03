@@ -20,10 +20,10 @@ import (
 	"github.com/grafana/grafana/pkg/components/gtime"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/remotecache"
-	"github.com/grafana/grafana/pkg/middleware/authproxy"
+	"github.com/grafana/grafana/pkg/login"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/auth"
-	"github.com/grafana/grafana/pkg/services/login"
+	"github.com/grafana/grafana/pkg/services/contexthandler/authproxy"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 )
@@ -636,8 +636,8 @@ func middlewareScenario(t *testing.T, desc string, fn scenarioFunc) {
 		sc.userAuthTokenService = auth.NewFakeUserAuthTokenService()
 		sc.remoteCacheService = remotecache.NewFakeStore(t)
 
-		sc.m.Use(GetContextHandler(sc.userAuthTokenService, sc.remoteCacheService, nil))
-
+		ctxHdlr := getContextHandler(t)
+		sc.m.Use(ctxHdlr)
 		sc.m.Use(OrgRedirect())
 
 		sc.defaultHandler = func(c *models.ReqContext) {
